@@ -1,0 +1,54 @@
+# Requires _GCP_REGION, _ENVIRONMENT, _SERVICE_NAME, _GITHUB_OWNER, _GITHUB_REPO
+substitutions:
+  _REPO_NAME: ${_GCP_REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO_NAME}
+  _IMAGE_NAME: ${_REPO_NAME}/${_SERVICE_NAME}:${SHORT_SHA}
+  _REVISION: ${_ENVIRONMENT}-${SHORT_SHA}
+images:
+  - '$_IMAGE_NAME'
+
+steps:
+  - name: 'golang'
+    id: 'prepare-golang-image'
+    args:
+      - '-c'
+      - |
+        sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'prepare-gcloud-image'
+    args:
+      - '-c'
+      - |
+        sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+
+  - name: 'golang'
+    id: 'unit-tests'
+    waitFor:
+      - 'prepare-golang-image'
+    args: ['task', 'test']
+
+  - name: 'golang'
+    id: 'build'
+    waitFor:
+      - 'unit-tests'
+    args: [ 'task', 'build:docker' ]
+    env:
+      - DOCKER_REPO=$_REPO_NAME
+      - SERVICE_NAME=$_SERVICE_NAME
+      - GITHUB_OWNER=$_GITHUB_OWNER
+      - GITHUB_REPO=$_GITHUB_REPO
+
+  - name: 'golang'
+    id: 'push'
+    waitFor:
+      - 'build'
+    args: [ 'task', 'push' ]
+    env:
+      - DOCKER_REPO=$_REPO_NAME
+      - SERVICE_NAME=$_SERVICE_NAME
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy'
+    waitFor:
+      - 'push'
+    args: [ 'task', 'deploy' ]

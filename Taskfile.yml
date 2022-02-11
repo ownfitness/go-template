@@ -1,0 +1,49 @@
+  version: '3'
+
+  # Static env vars for the task runners
+  env:
+    SERVICE_NAME: service-name
+    GITHUB_OWNER: my-owner
+    GITHUB_REPO: my-repo
+    DOCKER_REPO: my-repo
+
+  # Dynamic variables for the task runners
+  vars:
+    GIT_COMMIT:
+      sh: git log -n 1 --format=%h
+    GO_VERSION:
+      sh: go version | awk '{ print $3 }' | sed s/go//
+
+  tasks:
+    default:
+      cmds:
+        - task --list
+
+    test:
+      desc: "Unit tests for application"
+      cmds:
+        - go test ./... -v
+
+    build:
+      desc: "Builds the application as a binary file"
+      cmds:
+        - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-X main.Version={{.GIT_COMMIT}}" -o builds/$SERVICE_NAME-linux-amd64
+
+    build:docker:
+      desc: "Builds the application in a docker container"
+      cmds:
+        - docker build --build-arg GITHUB_OWNER=$GITHUB_OWNER --build-arg GITHUB_REPO=$GITHUB_REPO --build-arg SERVICE_NAME=$SERVICE_NAME . -t $DOCKER_REPO/$IMAGE_NAME:{{.GIT_COMMIT}}
+      env:
+        IMAGE_NAME: $SERVICE_NAME
+
+    push:
+      desc: "Push docker image to repository"
+      cmds:
+        - docker push $DOCKER_REPO/$IMAGE_NAME:{{.GIT_COMMIT}}
+      env:
+        IMAGE_NAME: $SERVICE_NAME
+
+    deploy:
+      desc: "Deploy my image"
+      cmds:
+        - gcloud command to deploy stuff
