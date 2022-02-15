@@ -5,10 +5,10 @@
     "test:firestoreCI": "npm run testCI --prefix=firestore"
   },
   "dependencies": {
-    "concurrently": "^6.5.1"
+    "concurrently": ">=6.5.1"
   },
   "devDependencies": {
-    "firebase-tools": "^10.1.5"
+    "firebase-tools": ">=10.2.0"
   },
   "engines": {
     "node": ">=14"
