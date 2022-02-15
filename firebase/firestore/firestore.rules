@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+    match /databases/{database}/documents {
+        // lock down the db
+        match /{document=**} {
+            allow read: if false;
+            allow write: if false;
+        }
+
+        // TEST DATA RULES
+        // Match any document in the 'cities' collection
+        match /cities/{city} {
+            allow read: if request.auth != null;
+            allow write: if false;
+        }
+
+        // Match any document in the 'posts' collection
+        match /posts/{post} {
+            allow read: if request.auth != null;
+            allow update, delete: if
+                request.auth.uid == resource.data.uid;
+        }
+
+        // TEST USER RULES
+        // Allow only users with the logged in UserId to read from this and nested documents
+        match /users/{userId}/{document=**} {
+            allow read, update: if
+                request.auth != null && request.auth.uid == userId;
+            allow delete: if false; // no deletes
+        }
+    }
+}

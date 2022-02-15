@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "start": "concurrently \"npm run test:firestore\"",
+    "test:firestore": "npm run test --prefix=firestore",
+    "test:firestoreCI": "npm run testCI --prefix=firestore"
+  },
+  "dependencies": {
+    "concurrently": "^6.5.1"
+  },
+  "devDependencies": {
+    "firebase-tools": "^10.1.5"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

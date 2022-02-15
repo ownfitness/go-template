@@ -45,3 +45,6 @@ atlassian-ide-plugin.xml
 # Builds
 builds/
 
+# Local files
+.env
+emulator/cache

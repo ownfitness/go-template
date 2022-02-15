@@ -22,7 +22,7 @@
     test:
       desc: "Unit tests for application"
       cmds:
-        - go test ./... -v
+        - go test ./...
 
     build:
       desc: "Builds the application as a binary file"

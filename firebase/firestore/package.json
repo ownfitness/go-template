@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "lint": "eslint .",
+    "test": "mocha './tests/**/*.js' -w --watch-files=./firestore.rules,./*.js,./**/*.js --ignore 'node_modules/**/*' --recursive --timeout 60000",
+    "testCI": "mocha './tests/**/*.js' --recursive --timeout 60000 --exit"
+  },
+  "devDependencies": {
+    "firebase": "^9.6.1",
+    "@firebase/rules-unit-testing": "^2.0.1",
+    "eslint": "^8.5.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "mocha": "^9.1.3"
+  },
+  "dependencies": {
+    "firebase-admin": "^10.0.1"
+  }
+}

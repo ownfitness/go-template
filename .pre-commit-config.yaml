@@ -1,0 +1,60 @@
+exclude: '^$'
+default_stages: [push]
+repos:
+
+  - repo: https://github.com/cat-home-experts/pre-commit-manager
+    rev: 1.3.3
+    hooks:
+      - id: detect-unsigned-commit
+        exclude: '^$'
+        stages: [commit]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: detect-private-key
+      - id: detect-aws-credentials
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.1.0
+    hooks:
+      - id: detect-secrets
+        exclude: '^$'
+        args: [
+          '--exclude-lines', '(.*)# scan:ignore',
+          '--exclude-lines', '(\s{1,}secret\s{1,}= ".*")',
+          '--exclude-files', '(.*?).sops.yaml$',
+          '--exclude-files', '(.*?)config.enc.yaml$',
+          '--exclude-files', '(.*?).terraform(.*?)',
+          '--exclude-files', '(.*?).terragrunt-cache(.*?)',
+        ]
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.8.0
+    hooks:
+      - id: shellcheck
+        args: ['--severity=warning']  # Only show errors and warnings
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.26.3
+    hooks:
+      - id: yamllint
+
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: master
+    hooks:
+      - id: go-fmt
+      - id: go-vet
+      - id: go-imports
+      - id: go-unit-tests
+
+  - repo: https://github.com/milin/giticket
+    rev: v1.3
+    hooks:
+      - id: giticket
+        args: ['--mode=regex_match', '--regex=[A-Z]+-\d+', '--format={ticket} {commit_msg}']
+        stages: [commit-msg]
