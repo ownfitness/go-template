@@ -1,0 +1,8 @@
+actionlint 1.6.8
+gcloud 346.0.0
+grype 0.28.0
+jq 1.6
+shellcheck 0.8.0
+shfmt 3.4.2
+task 3.10.0
+yq 4.9.8
