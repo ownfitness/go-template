@@ -16,19 +16,22 @@ func PostUser(client *firestore.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var data models.User
 
-		if err := c.ShouldBind(&data); err != nil {
+		if err := c.ShouldBindJSON(&data); err != nil {
 			errorHandler(c, err.Error(), http.StatusBadRequest)
+			return
 		}
 
 		valid, reason := data.Validate()
 
 		if !valid {
 			errorHandler(c, reason, http.StatusBadRequest)
+			return
 		}
 
 		id, err := gcp.FirestoreSetUser(c, client, "users", data)
 		if err != nil {
 			errorHandler(c, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		data.Id = id

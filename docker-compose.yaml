@@ -14,6 +14,7 @@ services:
     environment:
       FIRESTORE_EMULATOR_HOST: emulator:8080
       PROJECT: ${FIREBASE_PROJECT}
+      DEBUG: "true"
     depends_on:
       emulator:
         condition: service_healthy

@@ -12,5 +12,4 @@ func errorHandler(c *gin.Context, message string, code int) {
 		Error: message,
 		Code:  code,
 	})
-	return
 }
