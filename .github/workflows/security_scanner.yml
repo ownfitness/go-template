@@ -1,0 +1,64 @@
+name: 'Scan'
+
+on:
+  pull_request:
+  push:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  vulnerability:
+    name: "Vulnerability"
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+      - name: 'Cache Grype Database'
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ runner.temp }}/.cache/grype
+          key: grype
+      - name: "Set Job Vars"
+        id: vars
+        run: |
+          echo "::set-output name=task_version::$(cat .tool-versions | grep -w task | cut -d ' ' -f2)"
+          if [[ ${{ github.event_name }} == 'push' && ${{ github.ref }} == "refs/heads/${{ github.event.repository.default_branch }}" ]]; then
+            echo "::set-output name=commmit_info:: [Push on Main]"
+          fi
+      - name: 'Install asdf dependencies'
+        uses: asdf-vm/actions/setup@v1
+      - name: 'Install Task'
+        uses: arduino/setup-task@v1
+        with:
+          version: ${{ steps.vars.outputs.task_version }}
+      - name: 'Scan for Vulnerabilities'
+        id: scan
+        run: |
+          set -e
+          task security -- sarif
+        env:
+          GRYPE_DB_CACHE_DIR: ${{ runner.temp }}/.cache/grype
+      - name: 'Upload SARIF reports'
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v1.0.31
+        with:
+          sarif_file: ./sarif-reports
+      - name: 'Dedicated Grype scan for SARIF report creation'
+        id: scan_grype
+        uses: anchore/scan-action@v3.2.0
+        with:
+          path: './'
+          fail-build: true
+          acs-report-enable: true
+        env:
+          GRYPE_DB_CACHE_DIR: ${{ runner.temp }}/.cache/grype
+      - name: 'Upload SARIF Grype reports'
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v1.0.31
+        with:
+          sarif_file: ${{ steps.scan_grype.outputs.sarif }}
